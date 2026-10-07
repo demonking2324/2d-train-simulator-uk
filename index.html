@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>2D Train Simulator UK</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="menu" class="overlay">
+  <div class="panel wide">
+    <h1>2D Train Simulator <span>UK</span></h1>
+    <p class="sub">Pick a journey, then a mission</p>
+    <div id="routes" class="tabs"></div>
+    <div id="career"></div>
+    <div class="bar" id="bar"><div id="modes" class="modes"></div><div id="dirs" class="modes"></div></div>
+    <div id="missions"></div>
+    <div id="freemap" class="hidden"></div>
+    <div id="shop" class="hidden"></div>
+    <div class="keys">
+      <span><kbd>W</kbd>/<kbd>↑</kbd> more power</span>
+      <span><kbd>S</kbd>/<kbd>↓</kbd> less power / brake</span>
+      <span><kbd>D</kbd> doors</span>
+      <span><kbd>H</kbd> horn</span>
+      <span><kbd>C</kbd> cab / side view</span>
+      <span><kbd>+</kbd>/<kbd>−</kbd> zoom</span>
+      <span><kbd>P</kbd> pause</span>
+      <span><kbd>M</kbd> mute</span>
+    </div>
+    <p class="tip">Keep to the speed limit, stop with the nose of the train at the <b>S</b> board, and arrive on time.</p>
+  </div>
+</div>
+
+<div id="pause" class="overlay hidden">
+  <div class="panel">
+    <h2>Paused</h2>
+    <div class="btns col">
+      <button id="resume">Resume</button>
+      <button id="restart" class="ghost">Restart mission</button>
+      <button id="quit" class="ghost">Quit to missions</button>
+    </div>
+  </div>
+</div>
+
+<div id="summary" class="overlay hidden"></div>
+
+<div id="touch" class="hidden">
+  <button id="t-pause" title="Pause">II</button>
+  <button id="t-view" title="Cab / side view">View</button>
+  <button id="t-horn" title="Horn">Horn</button>
+  <button id="t-doors" title="Doors">Doors</button>
+  <button id="t-mute" title="Sound on / off">Sound</button>
+  <button id="t-down" title="Less power / brake">▼</button>
+  <button id="t-up" title="More power">▲</button>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/scenery.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
