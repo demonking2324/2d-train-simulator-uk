@@ -325,19 +325,6 @@
     return x;
   }
 
-  // Wages earned and journeys bought
-  function loadBank() {
-    let b = null;
-    try { b = JSON.parse(localStorage.getItem('ts2duk.bank')); } catch (e) { /* storage unavailable */ }
-    return { money: b && b.money || 0, owned: b && b.owned || {} };
-  }
-  function saveBank(b) { try { localStorage.setItem('ts2duk.bank', JSON.stringify(b)); } catch (e) { /* storage unavailable */ } }
-  // A journey is yours if it is free, bought, or already has a result from before money existed
-  function owns(r, bank) {
-    const best = loadBest();
-    return !r.price || !!bank.owned[r.id] || r.missions.some(m => best[m.id + ':std'] != null || best[m.id + ':rev'] != null);
-  }
-
   function showMenu() {
     setRoute(RS.ROUTES[G.route]);
     G.mode = 'menu'; G.world = buildWorld(0, ROUTE.scale, 'clear'); G.wx = CALM; G.others = []; G.pass = 0; G.x = G.demoX = demoStart(G.world); G.v = 0; G.atStation = -1; G.target = 1; G.doors = 'closed'; G.doorAnim = 0; G.t = 0;
@@ -396,9 +383,6 @@
     for (const s of G.stops) if (!s.missed) sum += (s.timePts + s.stopPts) / 2;
     const base = n ? sum / (ROUTE.nonstop ? 1 : n) : 0, pct = Math.round(clamp(base - G.penalty, 0, 100));
     const free = !!W.mission.free;   // free play is scored for interest only: nothing is saved
-    // Wages: a pound for every two seconds of booked running time, scaled by the score
-    const pay = free ? 0 : Math.round(W.stations[n].arr / 2 * pct / 100);
-    if (pay) { const bank = loadBank(); bank.money += pay; saveBank(bank); }
     const stars = starsFor(pct), before = career();
     const key = W.mission.key || W.mission.id + ':std', best = loadBest();
     const isBest = !free && (!(key in best) || pct > best[key]);
@@ -412,10 +396,9 @@
       : '<tr><td>' + s.name + '</td><td>' + (s.late <= 15 ? 'On time' : fmtSecs(s.late) + ' late') + '</td><td>' + s.err.toFixed(1) + ' m</td><td>' + Math.round((s.timePts + s.stopPts) / 2) + '</td></tr>').join('');
     $('summary').innerHTML = '<div class="panel"><h2>' + (msg || 'Journey complete') + '</h2>' +
       '<p class="sub">' + W.mission.title + ' &middot; ' + W.stations[0].name + ' to ' + W.stations[n].name + '</p>' +
-      (free ? '<p class="freenote">Free play: no wages, stars, score or unlocks are earned</p>'
+      (free ? '<p class="freenote">Free play: no stars, score or unlocks are earned</p>'
         : '<div class="stars">' + '★'.repeat(stars) + '<span>' + '★'.repeat(3 - stars) + '</span></div>') +
       '<div class="pct">' + pct + '%' + (isBest ? ' <em>new best</em>' : '') + '</div>' +
-      (free ? '' : '<p class="pay">Wages earned: <b>£' + pay + '</b></p>') +
       news.map(t => '<p class="unlock">' + t + '</p>').join('') +
       '<table><tr><th>Station</th><th>Punctuality</th><th>Stop accuracy</th><th>Points</th></tr>' + rows + '</table>' +
       '<p class="pen">Penalties: &minus;' + Math.round(G.penalty) + ' &nbsp;(' + Math.round(G.overTime) + ' s over the speed limit)</p>' +
@@ -817,28 +800,16 @@
 
   // ---------- menu and input ----------
   function renderMenu() {
-    const car = career(), free = G.tab === 'free', bank = loadBank(), mine = owns(ROUTE, bank);
+    const car = career(), free = G.tab === 'free';
     $('routes').innerHTML = RS.ROUTES.map((r, i) => '<button data-r="' + i + '" class="' + (i === G.route ? 'on' : '') + '">' + r.tab +
-      '<small>' + (owns(r, bank) ? r.sub : 'Locked: £' + r.price + ' to buy') + '</small></button>').join('');
+      '<small>' + r.sub + '</small></button>').join('');
     $('career').innerHTML = '<span class="rank">' + car.rank + '</span><span><b>★ ' + car.stars + '</b> / ' + car.max + ' stars</span>' +
-      '<span>Career score <b>' + car.score + '</b></span><span class="cash">£' + bank.money + '</span><button id="reset" class="link">Reset progress</button>';
+      '<span>Career score <b>' + car.score + '</b></span><button id="reset" class="link">Reset progress</button>';
     $('reset').onclick = () => {
-      if (!confirm('Erase all stars, best scores, wages and bought journeys?')) return;
-      try { localStorage.removeItem('ts2duk.best'); localStorage.removeItem('ts2duk.bank'); } catch (e) { /* storage unavailable */ }
+      if (!confirm('Erase all stars and best scores on every journey?')) return;
+      try { localStorage.removeItem('ts2duk.best'); } catch (e) { /* storage unavailable */ }
       renderMenu();
     };
-    // A journey that has not been bought shows its price instead of its missions
-    $('bar').classList.toggle('hidden', !mine); $('shop').classList.toggle('hidden', mine);
-    if (!mine) {
-      const short = ROUTE.price - bank.money;
-      $('missions').classList.add('hidden'); $('freemap').classList.add('hidden');
-      $('shop').innerHTML = '<h3>' + ROUTE.tab + '</h3><p>' + ROUTE.sub + '. ' + RS.MISSIONS.length + ' missions in each direction, plus free play.</p>' +
-        '<p>Price <b>£' + ROUTE.price + '</b> &middot; you have <b>£' + bank.money + '</b>' + (short > 0 ? ' &middot; £' + short + ' more needed' : '') + '</p>' +
-        '<button id="buy"' + (short > 0 ? ' disabled' : '') + '>Buy this journey</button>' +
-        '<p class="tip">Wages are paid for every mission you complete; the better your score, the more you earn. Free play pays nothing.</p>';
-      $('buy').onclick = () => { const b = loadBank(); if (b.money < ROUTE.price) return; b.money -= ROUTE.price; b.owned[ROUTE.id] = true; saveBank(b); renderMenu(); };
-      return;
-    }
     $('modes').innerHTML = '<button data-t="missions" class="' + (free ? '' : 'on') + '">Missions</button><button data-t="free" class="' + (free ? 'on' : '') + '">Free play map</button>';
     const ends = [RS.STATIONS[RS.STATIONS.length - 1].name, RS.STATIONS[0].name];
     $('dirs').innerHTML = ends.map((e, i) => '<button data-d="' + i + '" class="' + (!!G.rev === !!i ? 'on' : '') + '">To ' + e + '</button>').join('');
@@ -960,7 +931,6 @@
   showMenu();
 
   // Jump straight into a mission for testing: ?r=vic&m=2&at=0.4&mph=80&wx=rain&cab=1&auto=1
-  if (q.has('cash')) { saveBank({ money: +q.get('cash'), owned: {} }); renderMenu(); }
   if (q.has('rev')) { G.rev = true; renderMenu(); }
   if (q.has('tab')) { G.tab = q.get('tab'); if (q.has('from')) G.pick = [+q.get('from'), +q.get('to')]; renderMenu(); }
   if (q.has('m')) {

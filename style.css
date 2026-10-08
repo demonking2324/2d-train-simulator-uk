@@ -102,13 +102,3 @@ button.link:hover { color: #fff; }
 .freebar button:hover { background: #ee1a72; }
 .freenote { margin: 0 0 8px; font-weight: 600; color: #ffc93c; }
 
-.cash { font-weight: 800; color: #39d98a; }
-.pay { margin: -6px 0 12px; font-size: 15px; color: #c2c8d3; }
-.pay b { color: #39d98a; font-size: 18px; }
-#shop { padding: 22px 24px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); }
-#shop h3 { margin: 0 0 6px; font-size: 20px; }
-#shop p { margin: 0 0 12px; color: #c2c8d3; font-size: 14px; }
-#shop p b { color: #fff; }
-#shop button { padding: 11px 28px; border-radius: 10px; background: #d6005c; font-weight: 700; }
-#shop button:hover { background: #ee1a72; }
-#shop button:disabled { background: rgba(255, 255, 255, 0.1); color: #8f98a8; cursor: not-allowed; }

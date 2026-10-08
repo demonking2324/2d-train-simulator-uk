@@ -209,9 +209,6 @@
   };
   for (const r of RS.ROUTES) for (const m of r.missions) m.back = BACK[m.id];
 
-  // Journeys beyond the first are bought with wages (pounds)
-  RS.ROUTES[1].price = 1000; RS.ROUTES[2].price = 2000;
-
   // Make a route current: the rest of the game reads STATIONS / LEGS / MISSIONS from here
   RS.useRoute = function (r) {
     RS.ROUTE = r; RS.STATIONS = r.stations; RS.LEGS = r.legs; RS.MISSIONS = r.missions; RS.UNLOCK = r.unlock;
